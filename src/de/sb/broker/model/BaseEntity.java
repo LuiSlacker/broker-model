@@ -1,9 +1,17 @@
 package de.sb.broker.model;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 @Entity
 public class BaseEntity implements Comparable<BaseEntity>{
 
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long identity;
+	
 	private int version;
 	private long creationTimestamp;
 	
@@ -18,10 +26,6 @@ public class BaseEntity implements Comparable<BaseEntity>{
 		}
 	}
 	
-	//default constructor
-	public BaseEntity() {
-	}
-	
 	public long getIdentity() {
 		return identity;
 	}
@@ -34,5 +38,7 @@ public class BaseEntity implements Comparable<BaseEntity>{
 		return creationTimestamp;
 	}
 	
+	//default constructor
+	public BaseEntity() {}
 	
 }

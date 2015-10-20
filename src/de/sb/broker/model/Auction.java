@@ -1,22 +1,31 @@
 package de.sb.broker.model;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Auction extends BaseEntity{
 
+	@Size(min=1,max=255)
 	private String title;
 	private short unitCount;
+	@Min(0)
 	private long askingPrice;
 	private long closureTimestamp;
+	@Size(min=1,max=8189)
 	private String description;
+	@ManyToOne
 	private Person seller;
-	private Set<Bid> bids;
+	@OneToMany
+	private List<Bid> bids = new ArrayList<Bid>();
 	
-	public Auction(){
-	}
 
 	public Person getSeller() {
 		return seller;
@@ -26,7 +35,7 @@ public class Auction extends BaseEntity{
 		return seller.getIdentity();
 	}
 
-	public Set<Bid> getBids() {
+	public List<Bid> getBids() {
 		return bids;
 	}
 	
@@ -35,6 +44,9 @@ public class Auction extends BaseEntity{
 	}
 	
 	public boolean isSealed(){
-		return bids.size() > 0;
+		return isClosed() | bids.size() > 0;
 	}
+	
+	//default constructor
+	public Auction(){}
 }

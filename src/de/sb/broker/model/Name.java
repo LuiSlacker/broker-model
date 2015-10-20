@@ -1,8 +1,16 @@
 package de.sb.broker.model;
 
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+@Embeddable
 public class Name {
 
-	private String family, given;
+	@NotNull @Size(min=1,max=31)
+	private String family;
+	@NotNull @Size(min=1,max=31)
+	private String given;
 
 	public String getFamily() {
 		return family;
