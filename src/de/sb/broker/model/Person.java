@@ -30,13 +30,25 @@ public class Person extends BaseEntity{
 	private Group userRole;
 	
 	//relations
-	@OneToMany
-	private Set<Auction> auctions = new HashSet<Auction>();
-	@OneToMany
-	private Set<Bid> bids = new HashSet<Bid>();
+	@OneToMany(mappedBy="Auction")
+	private Set<Auction> auctions;
+	@OneToMany(mappedBy="Bid")
+	private Set<Bid> bids;
 	
 	//default constructor
-	public Person() {
+	public Person() {}
+	
+	public Person(String alias, String password, Name name, Contact contact, 
+		   Address address, Group group) throws PasswordHashException {
+		this.alias = alias;
+		this.passwordHash = Person.passwordHash(password);
+		this.name = name;
+		this.contact = contact;
+		this.address = address;
+		this.userRole = group;
+		
+		this.auctions = new HashSet<Auction>();
+		this.bids = new HashSet<Bid>();
 	}
 	
 	public static enum Group {
@@ -47,8 +59,13 @@ public class Person extends BaseEntity{
 		return userRole;
 	}
 	
-	public static byte[] passwordHash(String password) throws NoSuchAlgorithmException {
-		MessageDigest md = MessageDigest.getInstance("SHA-256");
+	public static byte[] passwordHash(String password) throws PasswordHashException {
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			throw new PasswordHashException("Password hashing failed");	
+		}
 		md.update(password.getBytes());
 		return  md.digest();
 	}

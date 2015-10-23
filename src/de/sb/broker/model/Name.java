@@ -12,6 +12,15 @@ public class Name {
 	@NotNull @Size(min=1,max=31)
 	private String given;
 
+	//default constructor
+	public Name(){}
+	
+	public Name(String family, String given){
+		this.family = family;
+		this.given = given;
+	}
+	
+	//Accessors
 	public String getFamily() {
 		return family;
 	}

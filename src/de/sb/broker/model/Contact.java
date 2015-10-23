@@ -13,4 +13,29 @@ public class Contact {
 	private String email;
 	@Max(value=63)
 	private String phone; 
+	
+	//default constructor
+	public Contact(){};
+	
+	public Contact(String email, String phone){
+		this.email = email;
+		this.phone = phone;
+	}
+
+	//Accessors
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 }

@@ -1,6 +1,7 @@
 package de.sb.broker.model;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.Min;
 
@@ -10,8 +11,10 @@ public class Bid extends BaseEntity{
 	@Min(0)
 	private long price;
 	@ManyToOne
+	@JoinColumn(name="") //TODO
 	private Auction auction;
 	@ManyToOne
+	@JoinColumn(name="") //TODO
 	private Person bidder;
 	
 	

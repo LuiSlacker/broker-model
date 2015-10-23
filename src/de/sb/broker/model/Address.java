@@ -14,6 +14,16 @@ public class Address {
 	@Size(min=1,max=63)
 	private String city;
 	
+	//default constructor
+	public Address(){}
+	
+	public Address(String street, String postcode, String city){
+		this.street = street;
+		this.postcode = postcode;
+		this.city = city;
+	}
+	
+	//Accessors
 	public String getStreet() {
 		return street;
 	}
