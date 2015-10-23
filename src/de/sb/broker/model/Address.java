@@ -1,26 +1,31 @@
 package de.sb.broker.model;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Embeddable
 public class Address {
 
+	@Column(nullable=true, insertable=true, updatable=true)
 	@Max(value=63)
 	private String street;
+	
+	@Column(nullable=true, insertable=true, updatable=true)
 	@Max(value=15)
 	private String postcode;
+	
+	@Column(nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=63)
+	@NotNull
 	private String city;
 	
 	//default constructor
-	public Address(){}
-	
-	public Address(String street, String postcode, String city){
-		this.street = street;
-		this.postcode = postcode;
-		this.city = city;
+	public Address(){
+		this.street = "";
+		this.postcode = "";
 	}
 	
 	//Accessors

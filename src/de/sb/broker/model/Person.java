@@ -16,57 +16,110 @@ import javax.validation.Valid;
 public class Person extends BaseEntity{
 
 	//fields
-	@Column
+	@Column(nullable=false, insertable=true, updatable=true)
 	private String alias;
-	@Column
+	
+	@Column(nullable=false, insertable=true, updatable=true)
 	private byte[] passwordHash;
-	@Embedded @Valid
+	
+	@Embedded
+	@Valid
 	private Name name;
-	@Embedded @Valid
+	
+	@Embedded
+	@Valid
 	private Contact contact;
-	@Embedded @Valid
+	
+	@Embedded
+	@Valid
 	private Address address;
-	@Column @Enumerated
-	private Group userRole;
+	
+	@Enumerated
+	@Column(nullable=false, insertable=true, updatable=true)
+	private Group group;
 	
 	//relations
-	@OneToMany(mappedBy="Auction")
+	@OneToMany(mappedBy="seller")
 	private Set<Auction> auctions;
-	@OneToMany(mappedBy="Bid")
+	@OneToMany(mappedBy="bidder")
 	private Set<Bid> bids;
 	
-	//default constructor
-	public Person() {}
-	
-	public Person(String alias, String password, Name name, Contact contact, 
-		   Address address, Group group) throws PasswordHashException {
-		this.alias = alias;
-		this.passwordHash = Person.passwordHash(password);
-		this.name = name;
-		this.contact = contact;
-		this.address = address;
-		this.userRole = group;
-		
+	public Person(){
+		this.passwordHash = Person.passwordHash("");
+		this.name = new Name();
+		this.contact = new Contact();
+		this.address = new Address();
 		this.auctions = new HashSet<Auction>();
 		this.bids = new HashSet<Bid>();
+		this.group = Group.USER;
 	}
 	
 	public static enum Group {
 		ADMIN, USER
 	}
 	
-	public Group getGroup(){
-		return userRole;
-	}
-	
-	public static byte[] passwordHash(String password) throws PasswordHashException {
+	public static byte[] passwordHash(String password) {
 		MessageDigest md;
 		try {
 			md = MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
-			throw new PasswordHashException("Password hashing failed");	
+			throw new AssertionError();
 		}
 		md.update(password.getBytes());
 		return  md.digest();
 	}
+	
+	public void addAuction(Auction auction){
+		this.auctions.add(auction);
+	}
+	
+	public void addBid(Bid bid){
+		this.bids.add(bid);
+	}
+	
+	//Accessors
+	public Group getGroup(){
+		return group;
+	}
+	
+	public void setGroup(Group group){
+		this.group = group;
+	}
+	
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	public byte[] getPasswordHash() {
+		return passwordHash;
+	}
+
+	public void setPasswordHash(String password) {
+		this.passwordHash = Person.passwordHash(password);
+	}
+
+	public Name getName() {
+		return name;
+	}
+
+	public Contact getContact() {
+		return contact;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public Set<Auction> getAuctions() {
+		return auctions;
+	}
+
+	public Set<Bid> getBids() {
+		return bids;
+	}
+
 }

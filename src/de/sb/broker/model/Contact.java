@@ -1,7 +1,9 @@
 package de.sb.broker.model;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
@@ -10,16 +12,17 @@ public class Contact {
 
 	@Size(min=1,max=63)
 	@Pattern(regexp="[a-z_0-9.-]+@[a-z_0-9.-]+/.[a-z]{2,3}", flags=Pattern.Flag.CASE_INSENSITIVE)
+	@Column(nullable=false, insertable=true, updatable=true)
+	@NotNull
 	private String email;
+	
 	@Max(value=63)
+	@Column(nullable=true, insertable=true, updatable=true)
 	private String phone; 
 	
 	//default constructor
-	public Contact(){};
-	
-	public Contact(String email, String phone){
-		this.email = email;
-		this.phone = phone;
+	public Contact(){
+		this.phone = "";
 	}
 
 	//Accessors

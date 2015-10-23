@@ -1,5 +1,6 @@
 package de.sb.broker.model;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -7,18 +8,18 @@ import javax.validation.constraints.Size;
 @Embeddable
 public class Name {
 
-	@NotNull @Size(min=1,max=31)
+	@Column(nullable=false, insertable=true, updatable=true)
+	@Size(min=1,max=31)
+	@NotNull
 	private String family;
-	@NotNull @Size(min=1,max=31)
+	
+	@Column(nullable=false, insertable=true, updatable=true)
+	@Size(min=1,max=31)
+	@NotNull
 	private String given;
 
 	//default constructor
-	public Name(){}
-	
-	public Name(String family, String given){
-		this.family = family;
-		this.given = given;
-	}
+	protected Name(){}
 	
 	//Accessors
 	public String getFamily() {

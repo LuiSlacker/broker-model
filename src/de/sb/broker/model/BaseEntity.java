@@ -7,22 +7,31 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Inheritance(strategy=InheritanceType.JOINED)
 public class BaseEntity implements Comparable<BaseEntity>{
 
+	@Column(nullable=false, insertable=false, updatable = false)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@NotNull
 	private long identity;
 	
-	@Column
+	@Column(nullable=false, insertable=false, updatable = false)
+	@NotNull
 	private int version;
-	@Column
+	
+	@Column(nullable=false, insertable=true, updatable=false)
+	@NotNull
 	private long creationTimestamp;
 	
 	//default constructor
-	public BaseEntity() {}
+	public BaseEntity() {
+		this.creationTimestamp = System.currentTimeMillis();
+		this.version = 1;
+	}
 	
 	@Override
 	public int compareTo(BaseEntity o) {

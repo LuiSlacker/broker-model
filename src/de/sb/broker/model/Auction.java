@@ -1,8 +1,7 @@
 package de.sb.broker.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,52 +9,71 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import de.sb.java.validation.Inequal;
+import de.sb.java.validation.Inequal.Operator;
+
 @Entity
+@Inequal(leftAccessPath="seller", rightAccessPath={"bids", "bidder"}, operator=Operator.NOT_EQUAL)
+@Inequal(leftAccessPath="askingPrice", rightAccessPath={"bids", "price"}, operator=Operator.LESS_EQUAL)
+@Inequal(leftAccessPath="closureTimestamp", rightAccessPath="creationTimestamp", operator=Operator.GREATER)
 public class Auction extends BaseEntity{
 
-	@Column
-	@Size(min=1,max=255)
+	@Column(nullable=false, insertable=true, updatable=true)
+	@Size(min=1,max=255) 
+	@NotNull
 	private String title;
-	@Column
-	@Min(0)
+	
+	@Column(nullable=false, insertable=true, updatable=true)
+	@Min(1)
+	@NotNull
 	private short unitCount;
-	@Column
-	@Min(0)
+	
+	@Column(nullable=false, insertable=true, updatable=true)
+	@Min(1)
+	@NotNull
 	private long askingPrice;
-	@Column
+	
+	@Column(nullable=false, insertable=true, updatable=true)
+	@NotNull
 	private long closureTimestamp;
-	@Column
+	
+	@Column(nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=8189)
+	@NotNull
 	private String description;
+	
 	@ManyToOne
-	@JoinColumn(name="") //TODO
+	@JoinColumn(name="sellerReference")
+	@Column(nullable=false, insertable=true, updatable=false)
 	private Person seller;
-	@OneToMany(mappedBy="Bid")
-	private List<Bid> bids;
+	
+	@OneToMany(mappedBy="auction")
+	@Column(nullable=false, insertable=true, updatable=false)
+	@NotNull
+	private Set<Bid> bids;
 	
 	//default constructor
-	public Auction(){}
-	
-	public Auction(String title, short unitCount, long askingPrice, long closureTimeStamp, 
-			String description, Person seller){
-		this.title = title;
-		this.unitCount = unitCount;
-		this.askingPrice = askingPrice;
-		this.closureTimestamp = closureTimeStamp;
-		this.description = description;
-		
-		this.seller = seller;
-		this.bids = new ArrayList<Bid>();
+	protected Auction(){
+		this(null);
 	}
+	
+	public Auction(Person seller){
+		this.unitCount = 1;
+		this.askingPrice = 1;
+		this.seller = seller;
+		this.bids = new HashSet<Bid>();
+	}
+
 
 	public void addBid(Bid bid){
 		this.bids.add(bid);
 	}
 	
 	public boolean isClosed(){
-		return new Date().getTime() > closureTimestamp;
+		return System.currentTimeMillis() > closureTimestamp;
 	}
 	
 	public boolean isSealed(){
@@ -71,7 +89,48 @@ public class Auction extends BaseEntity{
 		return seller.getIdentity();
 	}
 	
-	public List<Bid> getBids() {
+	public String getTitle() {
+		return title;
+	}
+	
+	public short getUnitCount() {
+		return unitCount;
+	}
+	
+	public long getAskingPrice() {
+		return askingPrice;
+	}
+	
+	public long getClosureTimestamp() {
+		return closureTimestamp;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+	
+	
+	public Set<Bid> getBids() {
 		return bids;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setUnitCount(short unitCount) {
+		this.unitCount = unitCount;
+	}
+
+	public void setAskingPrice(long askingPrice) {
+		this.askingPrice = askingPrice;
+	}
+
+	public void setClosureTimestamp(long closureTimestamp) {
+		this.closureTimestamp = closureTimestamp;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
