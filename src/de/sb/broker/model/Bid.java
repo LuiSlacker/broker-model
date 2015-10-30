@@ -8,7 +8,6 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
 import de.sb.java.validation.Inequal;
 import de.sb.java.validation.Inequal.Operator;
@@ -17,11 +16,11 @@ import de.sb.java.validation.Inequal.Operator;
 @Entity
 @PrimaryKeyJoinColumn(name="bidIdentity")
 @Inequal(leftAccessPath={"auction", "seller", "identity"}, rightAccessPath={"bidder", "identity"}, operator = Operator.NOT_EQUAL)
+@Inequal(leftAccessPath="price", rightAccessPath={"auction", "askingPrice"}, operator=Operator.GREATER_EQUAL)
 public class Bid extends BaseEntity{
 	
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
-	@NotNull
 	private long price;
 	
 	@ManyToOne 
@@ -40,7 +39,7 @@ public class Bid extends BaseEntity{
 	}
 	
 	public Bid(Auction auction, Person bidder){
-		this.price = (this.auction == null) ? 1 : this.auction.getAskingPrice();
+		this.price = (auction == null) ? 1 : auction.getAskingPrice();
 		this.auction = auction;
 		this.bidder = bidder;
 	}
@@ -50,7 +49,7 @@ public class Bid extends BaseEntity{
 	}
 	
 	public long getAuctionReference() {
-		return auction.getIdentity();
+		return (this.auction == null) ? 0 : auction.getIdentity();
 	}
 	
 	public Person getBidder() {
@@ -58,7 +57,7 @@ public class Bid extends BaseEntity{
 	}
 	
 	public long getBidderReference() {
-		return bidder.getIdentity();
+		return (this.bidder == null) ? 0 : bidder.getIdentity();
 	}
 	
 	public long getPrice() {

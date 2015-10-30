@@ -20,7 +20,6 @@ import de.sb.java.validation.Inequal.Operator;
 @Table(name="Auction", schema="broker")
 @Entity
 @PrimaryKeyJoinColumn(name="auctionIdentity")
-@Inequal(leftAccessPath="askingPrice", rightAccessPath={"bids", "price"}, operator=Operator.LESS_EQUAL)
 @Inequal(leftAccessPath="closureTimestamp", rightAccessPath="creationTimestamp", operator=Operator.GREATER)
 public class Auction extends BaseEntity{
 

@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 @Table(name="BaseEntity", schema="broker")
 @Entity
@@ -18,18 +17,14 @@ import javax.validation.constraints.NotNull;
 @DiscriminatorColumn(name="discriminator", discriminatorType = DiscriminatorType.STRING)
 public class BaseEntity implements Comparable<BaseEntity>{
 
-	@Column(nullable=false, insertable=false, updatable = false)
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@NotNull
 	private long identity;
 	
-	@Column(nullable=false, insertable=false, updatable = false)
-	@NotNull
+	@Column(nullable=false, insertable=false, updatable=false, unique=true)
 	private int version;
 	
 	@Column(nullable=false, insertable=true, updatable=false)
-	@NotNull
 	private long creationTimestamp;
 	
 	//default constructor
