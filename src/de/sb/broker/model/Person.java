@@ -10,9 +10,13 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 import javax.validation.Valid;
 
-@Entity
+@Table(name="Person", schema="Person")
+@Entity 
+@PrimaryKeyJoinColumn(name="PersonIdentity")
 public class Person extends BaseEntity{
 
 	//fields

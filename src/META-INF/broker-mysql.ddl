@@ -26,7 +26,7 @@ CREATE TABLE Person (
 	city VARCHAR(63) NOT NULL,
 	email VARCHAR(63) NOT NULL,
 	phone VARCHAR(63) NULL,
-	PRIMARY KEY (PersonIdentity),
+	PRIMARY KEY (personIdentity),
 	UNIQUE KEY (alias),
 	UNIQUE KEY (email),
 	FOREIGN KEY (personIdentity) REFERENCES BaseEntity (identity) ON DELETE CASCADE ON UPDATE CASCADE

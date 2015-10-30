@@ -45,8 +45,8 @@ public class EntityService {
 	@DELETE
 	@Path("{identity}")
 	public void deleteEntity (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
-		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
-		final Person requester = LifeCycleProvider.authenticate(authentication);
+		final EntityManager brokerManager = LifeCycleProviderSkeleton.brokerManager();
+		final Person requester = LifeCycleProviderSkeleton.authenticate(authentication);
 		if (requester.getGroup() != ADMIN) throw new ClientErrorException(FORBIDDEN);
 
 		brokerManager.getEntityManagerFactory().getCache().evict(BaseEntity.class, identity);

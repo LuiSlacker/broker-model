@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -15,8 +17,9 @@ import javax.validation.constraints.Size;
 import de.sb.java.validation.Inequal;
 import de.sb.java.validation.Inequal.Operator;
 
+@Table(name="Auction", schema="broker")
 @Entity
-@Inequal(leftAccessPath="seller", rightAccessPath={"bids", "bidder"}, operator=Operator.NOT_EQUAL)
+@PrimaryKeyJoinColumn(name="auctionIdentity")
 @Inequal(leftAccessPath="askingPrice", rightAccessPath={"bids", "price"}, operator=Operator.LESS_EQUAL)
 @Inequal(leftAccessPath="closureTimestamp", rightAccessPath="creationTimestamp", operator=Operator.GREATER)
 public class Auction extends BaseEntity{
@@ -56,14 +59,15 @@ public class Auction extends BaseEntity{
 	private Set<Bid> bids;
 	
 	//default constructor
-	protected Auction(){
+	protected Auction () {
 		this(null);
 	}
 	
-	public Auction(Person seller){
+	public Auction (Person seller){
 		this.unitCount = 1;
 		this.askingPrice = 1;
 		this.seller = seller;
+		this.closureTimestamp = System.currentTimeMillis() + 24*60*60*1000;
 		this.bids = new HashSet<Bid>();
 	}
 
@@ -86,7 +90,7 @@ public class Auction extends BaseEntity{
 	}
 	
 	public long getSellerReference() {
-		return seller.getIdentity();
+		return (this.seller == null) ? 0 : this.seller.getIdentity();
 	}
 	
 	public String getTitle() {
