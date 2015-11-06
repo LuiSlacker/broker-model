@@ -16,7 +16,7 @@ import javax.validation.Valid;
 
 @Table(name="Person", schema="Person")
 @Entity 
-@PrimaryKeyJoinColumn(name="PersonIdentity")
+@PrimaryKeyJoinColumn(name="personIdentity")
 public class Person extends BaseEntity{
 
 	//fields
