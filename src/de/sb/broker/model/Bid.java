@@ -24,13 +24,11 @@ public class Bid extends BaseEntity{
 	private long price;
 	
 	@ManyToOne 
-	@JoinColumn(name="auctionReference")
-	@Column(nullable=false, insertable=true, updatable=false)
+	@JoinColumn(name="auctionReference", nullable=false, insertable=true, updatable=false)
 	private Auction auction;
 	
 	@ManyToOne 
-	@JoinColumn(name="bidderReference")
-	@Column(nullable=false, insertable=true, updatable=false)
+	@JoinColumn(name="bidderReference", nullable=false, insertable=true, updatable=false)
 	private Person bidder;
 	
 	//default constructor

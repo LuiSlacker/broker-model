@@ -48,12 +48,11 @@ public class Auction extends BaseEntity{
 	private String description;
 	
 	@ManyToOne
-	@JoinColumn(name="sellerReference")
-	@Column(nullable=false, insertable=true, updatable=false)
+	@JoinColumn(name="sellerReference", nullable=false, insertable=true, updatable=false)
 	private Person seller;
 	
 	@OneToMany(mappedBy="auction")
-	@Column(nullable=false, insertable=true, updatable=false)
+	//@Column(nullable=false, insertable=true, updatable=false)
 	@NotNull
 	private Set<Bid> bids;
 	
