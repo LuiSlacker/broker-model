@@ -3,6 +3,7 @@ package de.sb.broker.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -47,7 +48,7 @@ public class Auction extends BaseEntity{
 	@NotNull
 	private String description;
 	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name="sellerReference", nullable=false, insertable=true, updatable=false)
 	private Person seller;
 	

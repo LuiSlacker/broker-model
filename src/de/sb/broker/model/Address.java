@@ -10,11 +10,11 @@ import javax.validation.constraints.Size;
 public class Address {
 
 	@Column(nullable=true, insertable=true, updatable=true)
-	@Max(value=63)
+	@Size(max=63)
 	private String street;
 	
 	@Column(nullable=true, insertable=true, updatable=true)
-	@Max(value=15)
+	@Size(max=15)
 	private String postcode;
 	
 	@Column(nullable=false, insertable=true, updatable=true)

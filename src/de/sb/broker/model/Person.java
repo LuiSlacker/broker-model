@@ -14,8 +14,8 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.Valid;
 
-@Table(name="Person", schema="Person")
-@Entity 
+@Table(name="Person", schema="broker")
+@Entity
 @PrimaryKeyJoinColumn(name="personIdentity")
 public class Person extends BaseEntity{
 
@@ -39,7 +39,7 @@ public class Person extends BaseEntity{
 	private Address address;
 	
 	@Enumerated
-	@Column(nullable=false, insertable=true, updatable=true)
+	@Column(name="groupAlias", nullable=false, insertable=true, updatable=true)
 	private Group group;
 	
 	//relations
@@ -49,6 +49,7 @@ public class Person extends BaseEntity{
 	private Set<Bid> bids;
 	
 	public Person(){
+		this.alias = "";
 		this.passwordHash = Person.passwordHash("");
 		this.name = new Name();
 		this.contact = new Contact();

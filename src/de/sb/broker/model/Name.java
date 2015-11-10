@@ -8,12 +8,12 @@ import javax.validation.constraints.Size;
 @Embeddable
 public class Name {
 
-	@Column(nullable=false, insertable=true, updatable=true)
+	@Column(name="familyName", nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=31)
 	@NotNull
 	private String family;
 	
-	@Column(nullable=false, insertable=true, updatable=true)
+	@Column(name="givenName", nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=31)
 	@NotNull
 	private String given;
