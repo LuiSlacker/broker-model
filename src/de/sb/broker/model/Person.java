@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -38,7 +39,7 @@ public class Person extends BaseEntity{
 	@Valid
 	private Address address;
 	
-	@Enumerated
+	@Enumerated(EnumType.STRING)
 	@Column(name="groupAlias", nullable=false, insertable=true, updatable=true)
 	private Group group;
 	
