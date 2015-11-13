@@ -44,6 +44,7 @@ public class Person extends BaseEntity{
 	@Valid
 	private Address address;
 	
+	@XmlElement
 	@Enumerated(EnumType.STRING)
 	@Column(name="groupAlias", nullable=false, insertable=true, updatable=true)
 	private Group group;
