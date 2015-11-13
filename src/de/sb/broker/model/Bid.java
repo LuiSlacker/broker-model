@@ -8,6 +8,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Min;
+import javax.xml.bind.annotation.XmlElement;
 
 import de.sb.java.validation.Inequal;
 import de.sb.java.validation.Inequal.Operator;
@@ -19,6 +20,7 @@ import de.sb.java.validation.Inequal.Operator;
 @Inequal(leftAccessPath="price", rightAccessPath={"auction", "askingPrice"}, operator=Operator.GREATER_EQUAL)
 public class Bid extends BaseEntity{
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
 	private long price;

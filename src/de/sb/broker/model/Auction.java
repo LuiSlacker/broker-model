@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlElement;
 
 import de.sb.java.validation.Inequal;
 import de.sb.java.validation.Inequal.Operator;
@@ -23,25 +24,30 @@ import de.sb.java.validation.Inequal.Operator;
 @Inequal(leftAccessPath="closureTimestamp", rightAccessPath="creationTimestamp", operator=Operator.GREATER)
 public class Auction extends BaseEntity{
 
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=255) 
 	@NotNull
 	private String title;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
 	@NotNull
 	private short unitCount;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
 	@NotNull
 	private long askingPrice;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@NotNull
 	private long closureTimestamp;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Size(min=1,max=8189)
 	@NotNull
@@ -74,10 +80,12 @@ public class Auction extends BaseEntity{
 		this.bids.add(bid);
 	}
 	
+	@XmlElement
 	public boolean isClosed(){
 		return System.currentTimeMillis() > closureTimestamp;
 	}
 	
+	@XmlElement
 	public boolean isSealed(){
 		return isClosed() | bids.size() > 0;
 	}

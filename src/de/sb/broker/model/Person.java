@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.Valid;
+import javax.xml.bind.annotation.XmlElement;
 
 @Table(name="Person", schema="broker")
 @Entity
@@ -21,20 +22,24 @@ import javax.validation.Valid;
 public class Person extends BaseEntity{
 
 	//fields
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	private String alias;
 	
 	@Column(nullable=false, insertable=true, updatable=true)
 	private byte[] passwordHash;
 	
+	@XmlElement
 	@Embedded
 	@Valid
 	private Name name;
 	
+	@XmlElement
 	@Embedded
 	@Valid
 	private Contact contact;
 	
+	@XmlElement
 	@Embedded
 	@Valid
 	private Address address;
