@@ -53,6 +53,7 @@ public class BaseEntity implements Comparable<BaseEntity>{
 		return identity;
 	}
 
+	@XmlElement
 	public int getVersion() {
 		return version;
 	}
