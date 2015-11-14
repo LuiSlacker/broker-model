@@ -3,6 +3,7 @@ package de.sb.broker.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -25,40 +26,37 @@ import de.sb.java.validation.Inequal.Operator;
 public class Auction extends BaseEntity{
 
 	@XmlElement
-	@Column(nullable=false, insertable=true, updatable=true)
-	@Size(min=1,max=255) 
+	@Column(nullable=false, insertable=true, updatable=true, length=255)
+	@Size(min=1,max=255)
 	@NotNull
 	private String title;
 	
 	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
-	@NotNull
 	private short unitCount;
 	
 	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
 	@Min(1)
-	@NotNull
 	private long askingPrice;
 	
 	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=true)
-	@NotNull
 	private long closureTimestamp;
 	
 	@XmlElement
-	@Column(nullable=false, insertable=true, updatable=true)
+	@Column(nullable=false, insertable=true, updatable=true, length=8189)
 	@Size(min=1,max=8189)
 	@NotNull
 	private String description;
 	
-	@ManyToOne
+	@ManyToOne(optional=false)
 	@JoinColumn(name="sellerReference", nullable=false, insertable=true, updatable=false)
 	private Person seller;
 	
-	@OneToMany(mappedBy="auction")
-	//@Column(nullable=false, insertable=true, updatable=false)
+	@OneToMany(mappedBy="auction", cascade = CascadeType.REMOVE)
+//	@Column(nullable=false, insertable=true, updatable=false)
 	@NotNull
 	private Set<Bid> bids;
 	

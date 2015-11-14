@@ -25,11 +25,11 @@ public class Bid extends BaseEntity{
 	@Min(1)
 	private long price;
 	
-	@ManyToOne 
+	@ManyToOne(optional=false)
 	@JoinColumn(name="auctionReference", nullable=false, insertable=true, updatable=false)
 	private Auction auction;
 	
-	@ManyToOne 
+	@ManyToOne(optional=false)
 	@JoinColumn(name="bidderReference", nullable=false, insertable=true, updatable=false)
 	private Person bidder;
 	

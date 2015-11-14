@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -14,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 
 @Table(name="Person", schema="broker")
@@ -23,35 +26,45 @@ public class Person extends BaseEntity{
 
 	//fields
 	@XmlElement
-	@Column(nullable=false, insertable=true, updatable=true)
+	@Column(nullable=false, insertable=true, updatable=true, unique=true)
+	@Size(min=1,max=16)
+	@NotNull
 	private String alias;
 	
 	@Column(nullable=false, insertable=true, updatable=true)
+	@Size(min=32,max=32)
+	@NotNull
 	private byte[] passwordHash;
 	
 	@XmlElement
 	@Embedded
 	@Valid
+	@NotNull
 	private Name name;
 	
 	@XmlElement
 	@Embedded
 	@Valid
+	@NotNull
 	private Contact contact;
 	
 	@XmlElement
 	@Embedded
 	@Valid
+	@NotNull
 	private Address address;
 	
 	@Enumerated(EnumType.STRING)
 	@Column(name="groupAlias", nullable=false, insertable=true, updatable=true)
+	@NotNull
 	private Group group;
 	
 	//relations
-	@OneToMany(mappedBy="seller")
+	@OneToMany(mappedBy="seller", cascade = CascadeType.REMOVE)
+	@NotNull
 	private Set<Auction> auctions;
-	@OneToMany(mappedBy="bidder")
+	@OneToMany(mappedBy="bidder", cascade = CascadeType.REMOVE)
+	@NotNull
 	private Set<Bid> bids;
 	
 	public Person(){

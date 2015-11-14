@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
+import javax.persistence.Version;
+import javax.validation.constraints.Min;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -31,7 +33,9 @@ public class BaseEntity implements Comparable<BaseEntity>{
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long identity;
 	
-	@Column(nullable=false, insertable=false, updatable=false, unique=true)
+	@Column(nullable=false, insertable=false, updatable=true)
+	@Min(1)
+	@Version
 	private int version;
 	
 	@Column(nullable=false, insertable=true, updatable=false)
