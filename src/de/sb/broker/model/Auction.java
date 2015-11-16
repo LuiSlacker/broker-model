@@ -56,7 +56,6 @@ public class Auction extends BaseEntity{
 	private Person seller;
 	
 	@OneToMany(mappedBy="auction", cascade = CascadeType.REMOVE)
-//	@Column(nullable=false, insertable=true, updatable=false)
 	@NotNull
 	private Set<Bid> bids;
 	

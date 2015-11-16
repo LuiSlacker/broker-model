@@ -18,7 +18,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "person")
 @Table(name="Person", schema="broker")
 @Entity
 @PrimaryKeyJoinColumn(name="personIdentity")
