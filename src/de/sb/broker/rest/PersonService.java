@@ -2,8 +2,11 @@ package de.sb.broker.rest;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,14 +32,50 @@ public class PersonService {
 	final static EntityManager em = emf.createEntityManager();
 	
 	@GET
-	@Produces("application/json")
-	public List<Person> getPeople(
+	@Produces({"application/xml", "application/json"})
+	public Collection<Person> getPeople(
 			@QueryParam("resultOffset") int resultOffset,
-			@QueryParam("resultLength") int resultLength) {
+			@QueryParam("resultLength") int resultLength,
+			@QueryParam("alias") String alias,
+			@QueryParam("firstName") String firstName,
+			@QueryParam("familyName") String familyName,
+			@QueryParam("email") String email,
+			@QueryParam("phone") String phone,
+			@QueryParam("street") String street,
+			@QueryParam("postcode") String postcode,
+			@QueryParam("city") String city) {
 		
-		TypedQuery<Person> query = em.createQuery("select p from Person as p", Person.class);
-		List<Person> allPeople= query.getResultList();
-		return allPeople.subList(resultOffset, (resultLength == 0) ?  allPeople.size() : resultLength);
+		TypedQuery<Long> query = em.createQuery("select p.identity from Person as p WHERE"
+				+ "(:alias is null or p.alias = :alias) and"
+				+ "(:firstName is null or p.name.given = :firstName) and"
+				+ "(:familyName is null or p.name.family = :familyName) and"
+				+ "(:email is null or p.contact.email = :email) and"
+				+ "(:phone is null or p.contact.phone = :phone) and"
+				+ "(:street is null or p.address.street = :street) and"
+				+ "(:postcode is null or p.address.postcode = :postcode) and"
+				+ "(:city is null or p.address.city = :city)", Long.class);
+		query.setParameter("alias", alias);
+		query.setParameter("firstName", firstName);
+		query.setParameter("familyName", familyName);
+		query.setParameter("email", email);
+		query.setParameter("phone", phone);
+		query.setParameter("street", street);
+		query.setParameter("postcode", postcode);
+		query.setParameter("city", city);
+		
+		if (resultOffset != 0) query.setFirstResult(resultOffset);
+		if (resultLength != 0) query.setMaxResults(resultLength);
+		
+		Collection<Person> allPeople = new TreeSet<Person>(Comparator.comparing(Person::getAlias));
+		List<Long> allPeopleIds = query.getResultList();
+		for (long personId : allPeopleIds) {
+			try {
+				allPeople.add(em.find(Person.class, personId));
+			} catch (EntityNotFoundException e) {
+				throw new ClientErrorException(NOT_FOUND);
+			}
+		}
+		return allPeople;
 	}
 	
 	@PUT
