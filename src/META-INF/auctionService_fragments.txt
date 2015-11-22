@@ -1,0 +1,100 @@
+package de.sb.broker.rest;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeSet;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response.Status;
+
+import de.sb.broker.model.Auction;
+
+@Path("/auctions")
+public class AuctionService {
+
+	final static EntityManagerFactory emf = Persistence.createEntityManagerFactory("broker");
+	final static EntityManager em = emf.createEntityManager();
+	
+	@GET
+	public List<Auction> getAuctions(
+			@QueryParam("resultOffset") int resultOffset,
+			@QueryParam("resultLength") int resultLength) {
+		
+		static private final String AUCTIONS_BY_CRITERIA = "select a.identity from Auctions as a where"
+				+ "(:upperCreationTimestamp is null or a.creationTimestamp <= :creationTimestamp)"
+				
+				;
+
+		final TypedQuery<Long> query = brokerManager.createQuery(AUCTIONS_BY_CRITERIA, Long.class);
+		if(resultOffset > 0) query.setFirstResult(resultOffset);
+		if(resultLength > 0) query.setMaxResults(resultLength);
+		query.setParameter("lowerCreationTimestamp", lowerCreationTimestamp);
+		query.setParameter("upperCreationTimestamp", upperCreationTimestamp);
+		query.setParameter("lowerClosureTimestamp", lowerClosureTimestamp);
+		query.setParameter("upperClosureTimestamp", upperClosureTimestamp);
+		query.setParameter("lowerAskingPrice", lowerAskingPrice);
+		query.setParameter("upperAskingPrice", upperAskingPrice);
+		query.setParameter("lowerUnitCount", lowerUnitCount);
+		query.setParameter("upperUnitCount", upperUnitCount);
+		query.setParameter("titleFragment", titleFragment);
+		query.setParameter("descriptionFragment", descriptionFragment);
+		
+		final Collection<Long> identities = query.getResultList();
+		final Collection<Long> auctions = new TreeSet<>(Comparator.reverseOrder());
+		for (final Long identity : identities) {
+			final Auction auction = brokerManager.find (Auction.class, identity);
+			if (auction !=null) auction.add(auction);
+		}
+		
+//		return allAuctions.subList(resultOffset, (resultLength==0) ? allAuctions.size() : resultLength);
+	}
+	
+	@PUT
+	@Consumes({APPLICATION_JSON, APPLICATION_XML})
+	@Produces(TEXT_PLAIN)
+	public void createOrUpdateAuctions(@PathParam("identity") long identity) {
+		//TODO
+		// brokerManager
+		// Person requester = LyfeCycleProvider.authenticate(authentication);
+		//final boolean persistMode = template.getidentity() == 0;
+		
+		//final Auction auction;
+		// if (persistMode) {
+		// auction = new Auction(requester);
+		//} else {
+		// auction = brokerManager.find(Auction.class, template.getIdentity());
+		// if (auction null) throw ne ClientErrorException(NOT_FOUND);
+		// if auction.isSealed() ... nächste Aufgabe
+		
+		// commit
+	}
+	
+	@GET
+	@Path("/{identity}")
+	public Auction getAuctionIdentity(@PathParam("identity") long identity) {
+		try {
+			return em.find(Auction.class, identity);
+		} catch (EntityNotFoundException e) {
+			throw new ClientErrorException(Status.NOT_FOUND);
+		}
+	}
+	
+	@GET
+	@Produces({APPLICATION_JSON, APPLICATION_XML})
+	public Response queryCriteria {
+		
+	}
+}
