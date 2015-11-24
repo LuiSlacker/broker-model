@@ -1,9 +1,9 @@
 package de.sb.broker.rest;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
@@ -12,6 +12,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -21,6 +22,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response.Status;
 
 import de.sb.broker.model.Auction;
+import de.sb.broker.model.Person;
 
 @Path("/auctions")
 public class AuctionService {
@@ -71,7 +73,7 @@ public class AuctionService {
 		if (resultLength != 0) query.setMaxResults(resultLength);
 		
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
-		List<Long> allAuctionIds = query.getResultList();
+		Collection<Long> allAuctionIds = query.getResultList();
 		for (Long auctionId : allAuctionIds) {
 			try {
 				allAuctions.add(em.find(Auction.class, auctionId));
@@ -83,8 +85,37 @@ public class AuctionService {
 	}
 	
 	@PUT
-	public void createOrUpdateAuctions(@PathParam("identity") long identity) {
-		//TODO
+	@Consumes({"application/xml", "application/json"})
+	public Long createOrUpdateAuctions(
+			@QueryParam("personId") int personId,
+			Auction template) {
+		final boolean persist = template.getIdentity() == 0;
+		final Auction auction;
+		if(persist){
+			Person person;
+			try {
+				person = em.find(Person.class, personId);
+			} catch (EntityNotFoundException e) {
+				throw new ClientErrorException(400);
+			}
+			auction = new Auction(person);
+		} else{
+			auction = em.find(Auction.class, template.getIdentity());
+			if (auction.isSealed()) {
+				throw new ClientErrorException(409);
+			}
+		}
+		auction.setTitle(template.getTitle());
+		auction.setDescription(template.getDescription());
+		auction.setClosureTimestamp(template.getClosureTimestamp());
+		auction.setAskingPrice(template.getAskingPrice());
+		auction.setUnitCount(template.getUnitCount());
+		
+		em.getTransaction().begin();
+		if (persist) em.persist(auction);
+		em.getTransaction().commit();
+		em.close();
+		return auction.getIdentity();
 	}
 	
 	@GET

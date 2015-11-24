@@ -4,7 +4,6 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -67,7 +66,7 @@ public class PersonService {
 		if (resultLength != 0) query.setMaxResults(resultLength);
 		
 		Collection<Person> allPeople = new TreeSet<Person>(Comparator.comparing(Person::getAlias));
-		List<Long> allPeopleIds = query.getResultList();
+		Collection<Long> allPeopleIds = query.getResultList();
 		for (long personId : allPeopleIds) {
 			try {
 				allPeople.add(em.find(Person.class, personId));
@@ -79,9 +78,30 @@ public class PersonService {
 	}
 	
 	@PUT
-	public void createOrUpdatePerson() {
-		//TODO
-	}
+	public Long createOrUpdatePerson(Person template) {
+		final boolean persist = template.getIdentity() == 0;
+		final Person person;
+		if(persist){
+			person = new Person();
+		} else{
+			person = em.find(Person.class, template.getIdentity());
+		}
+		person.setAlias(template.getAlias());
+		person.setGroup(template.getGroup());
+		person.getName().setFamily(template.getName().getFamily());
+		person.getName().setGiven(template.getName().getGiven());
+		person.getAddress().setCity(template.getAddress().getCity());
+		person.getAddress().setPostcode(template.getAddress().getPostcode());
+		person.getAddress().setStreet(template.getAddress().getStreet());
+		person.getContact().setEmail(template.getContact().getEmail());
+		person.getContact().setPhone(template.getContact().getPhone());
+		
+		em.getTransaction().begin();
+		if (persist) em.persist(person);
+		em.getTransaction().commit();
+		em.close();
+		return person.getIdentity();
+}
 	
 	@GET
 	@Path("{identity}")
@@ -111,7 +131,7 @@ public class PersonService {
 	
 	@GET
 	@Path("/{identity}/bids")
-	public Set<Bid> getBids(
+	public Collection<Bid> getBids(
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength) {
