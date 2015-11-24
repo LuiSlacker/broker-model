@@ -4,7 +4,6 @@ import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
@@ -116,16 +115,22 @@ public class PersonService {
 	
 	@GET
 	@Path("/{identity}/auctions")
-	public Set<Auction> getAuction(
+	public Collection<Auction> getAuction(
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength) {
+		Person person;
 		try {
-			Person person = em.find(Person.class, identity);
-			return person.getAuctions();
+			person = em.find(Person.class, identity);
 		} catch (final EntityNotFoundException exception) {
 			throw new ClientErrorException(NOT_FOUND);
 		}
+		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
+		allAuctions.addAll(person.getAuctions());
+		for (Bid bid : person.getBids()) {
+			allAuctions.add(bid.getAuction());
+		}
+		return allAuctions;
 		
 	}
 	
