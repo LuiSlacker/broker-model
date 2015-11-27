@@ -19,7 +19,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response.Status;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Person;
@@ -100,7 +99,11 @@ public class AuctionService {
 			}
 			auction = new Auction(person);
 		} else{
-			auction = em.find(Auction.class, template.getIdentity());
+			try {
+				auction = em.find(Auction.class, template.getIdentity());
+			} catch (EntityNotFoundException e) {
+				throw new ClientErrorException(400);
+			}
 			if (auction.isSealed()) {
 				throw new ClientErrorException(409);
 			}
@@ -110,7 +113,7 @@ public class AuctionService {
 		auction.setClosureTimestamp(template.getClosureTimestamp());
 		auction.setAskingPrice(template.getAskingPrice());
 		auction.setUnitCount(template.getUnitCount());
-		
+		//TODO  set version
 		em.getTransaction().begin();
 		if (persist) em.persist(auction);
 		em.getTransaction().commit();
@@ -125,7 +128,7 @@ public class AuctionService {
 		try {
 			return em.find(Auction.class, identity);
 		} catch (EntityNotFoundException e) {
-			throw new ClientErrorException(Status.NOT_FOUND);
+			throw new ClientErrorException(NOT_FOUND);
 		}
 	}
 }

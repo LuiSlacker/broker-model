@@ -3,10 +3,12 @@ package de.sb.broker.rest;
 import static java.util.logging.Level.WARNING;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -20,6 +22,8 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+
 import de.sb.broker.model.Person;
 import de.sb.java.TypeMetadata;
 import de.sb.java.net.HttpAuthenticationCodec;
@@ -47,9 +51,9 @@ import de.sb.java.net.HttpAuthenticationCodec;
  * precondition that any HTTP request is processed within a single thread. This assumption may be
  * broken in some environments, but works nicely in most, like Jersey.
  */
-// TODO Uncomment this: @Provider
+@Provider
 @TypeMetadata(copyright = "2013-2015 Sascha Baumeister, all rights reserved", version = "1.0.0", authors = "Sascha Baumeister")
-public class LifeCycleProviderSkeleton implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Throwable> {
+public class LifeCycleProvider implements ContainerRequestFilter, ContainerResponseFilter, ExceptionMapper<Throwable> {
 	static private volatile EntityManagerFactory BROKER_FACTORY;
 	static private final ThreadLocal<EntityManager> BROKER_THREAD_LOCAL = new ThreadLocal<>();
 	static private final Object MONITOR = new Object();
@@ -118,7 +122,8 @@ public class LifeCycleProviderSkeleton implements ContainerRequestFilter, Contai
 		// password, creating a query using the constant below, and returning the person if it matches the password hash.
 		// If there is none, or if it fails the password hash check, then throw NotAuthorizedException("Basic"). Note
 		// that this exception type is a specialized Subclass of ClientErrorException that is capable of storing a
-		// challenge, in this case for Basic Authorization. 
+		// challenge, in this case for Basic Authorization.
+		// existiert user mit passwort? sha256 berechnen und vergleichen
 		throw new AssertionError(PERSON_BY_ALIAS);
 	}
 
@@ -128,7 +133,7 @@ public class LifeCycleProviderSkeleton implements ContainerRequestFilter, Contai
 	 * happened yet.
 	 * @throws RuntimeException if there is a problem configuring a persistence unit
 	 */
-	public LifeCycleProviderSkeleton () {
+	public LifeCycleProvider () {
 		brokerFactory();
 	}
 

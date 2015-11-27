@@ -44,18 +44,21 @@ public class Bid extends BaseEntity{
 		this.bidder = bidder;
 	}
 	
+	@XmlElement
 	public Auction getAuction() {
 		return auction;
 	}
 	
+	@XmlElement
 	public long getAuctionReference() {
 		return (this.auction == null) ? 0 : auction.getIdentity();
 	}
 	
+	@XmlElement
 	public Person getBidder() {
 		return bidder;
 	}
-	
+	@XmlElement
 	public long getBidderReference() {
 		return (this.bidder == null) ? 0 : bidder.getIdentity();
 	}

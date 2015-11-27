@@ -8,16 +8,19 @@ import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response.Status;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Bid;
@@ -31,7 +34,7 @@ public class PersonService {
 	
 	@GET
 	@Produces({"application/xml", "application/json"})
-	public Collection<Person> getPeople(
+	public Person[] getPeople(
 			@QueryParam("resultOffset") int resultOffset,
 			@QueryParam("resultLength") int resultLength,
 			@QueryParam("alias") String alias,
@@ -51,7 +54,7 @@ public class PersonService {
 				+ "(:phone is null or p.contact.phone = :phone) and"
 				+ "(:street is null or p.address.street = :street) and"
 				+ "(:postcode is null or p.address.postcode = :postcode) and"
-				+ "(:city is null or p.address.city = :city)", Long.class);
+				+ "(:city is null or p.address.city = :city)", Long.class); //creationTimestamp
 		query.setParameter("alias", alias);
 		query.setParameter("firstName", firstName);
 		query.setParameter("familyName", familyName);
@@ -61,29 +64,28 @@ public class PersonService {
 		query.setParameter("postcode", postcode);
 		query.setParameter("city", city);
 		
-		if (resultOffset != 0) query.setFirstResult(resultOffset);
-		if (resultLength != 0) query.setMaxResults(resultLength);
+		if (resultOffset > 0) query.setFirstResult(resultOffset);
+		if (resultLength > 0) query.setMaxResults(resultLength);
 		
 		Collection<Person> allPeople = new TreeSet<Person>(Comparator.comparing(Person::getAlias));
 		Collection<Long> allPeopleIds = query.getResultList();
 		for (long personId : allPeopleIds) {
-			try {
-				allPeople.add(em.find(Person.class, personId));
-			} catch (EntityNotFoundException e) {
-				throw new ClientErrorException(NOT_FOUND);
-			}
+				final Person person = em.find(Person.class, personId);
+				if (person != null) allPeople.add(person);
 		}
-		return allPeople;
+		return allPeople.toArray(new Person[0]);
 	}
 	
 	@PUT
-	public Long createOrUpdatePerson(Person template) {
+	@Consumes({"application/xml", "application/json"})
+	public Long createOrUpdatePerson(@Valid @NotNull Person template) {
 		final boolean persist = template.getIdentity() == 0;
 		final Person person;
 		if(persist){
 			person = new Person();
 		} else{
 			person = em.find(Person.class, template.getIdentity());
+			if (person == null) throw new ClientErrorException(NOT_FOUND);
 		}
 		person.setAlias(template.getAlias());
 		person.setGroup(template.getGroup());
@@ -94,6 +96,9 @@ public class PersonService {
 		person.getAddress().setStreet(template.getAddress().getStreet());
 		person.getContact().setEmail(template.getContact().getEmail());
 		person.getContact().setPhone(template.getContact().getPhone());
+		// Password übergeben Hash berechnen und setzen
+		person.setVersion(template.getVersion());
+		
 		
 		em.getTransaction().begin();
 		if (persist) em.persist(person);
@@ -104,25 +109,26 @@ public class PersonService {
 	
 	@GET
 	@Path("{identity}")
-	@Produces("application/json")
+	@Produces({"application/xml", "application/json"})
 	public Person getPerson(@PathParam("identity") long identity) {
-		try {
-			return em.find(Person.class, identity);
-		} catch (final EntityNotFoundException exception) {
-			throw new ClientErrorException(NOT_FOUND);
+		final Person person = em.find(Person.class, identity);
+		if (person != null){
+			return person;
+		} else{
+			throw new ClientErrorException(Status.NOT_FOUND);
 		}
 	}
 	
 	@GET
 	@Path("/{identity}/auctions")
+	@Produces({"application/xml", "application/json"})
 	public Collection<Auction> getAuction(
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength) {
-		Person person;
-		try {
-			person = em.find(Person.class, identity);
-		} catch (final EntityNotFoundException exception) {
+		
+		final Person person = em.find(Person.class, identity);
+		if (person == null) {
 			throw new ClientErrorException(NOT_FOUND);
 		}
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
@@ -136,15 +142,15 @@ public class PersonService {
 	
 	@GET
 	@Path("/{identity}/bids")
+	@Produces({"application/xml", "application/json"})
 	public Collection<Bid> getBids(
-			@PathParam("identity") long identity,
-			@QueryParam("ResultOffset") int ResultOffset,
-			@QueryParam("ResultLength") int ResultLength) {
-		try {
-			Person person = em.find(Person.class, identity);
+		@PathParam("identity") long identity,
+		@QueryParam("ResultOffset") int ResultOffset,
+		@QueryParam("ResultLength") int ResultLength) {
+	
+		final Person person = em.find(Person.class, identity);
+		if (person != null) {
 			return person.getBids();
-		} catch (final EntityNotFoundException exception) {
-			throw new ClientErrorException(NOT_FOUND);
-		}
+		} else throw new ClientErrorException(NOT_FOUND);
 	}
 }

@@ -33,11 +33,13 @@ public class BaseEntity implements Comparable<BaseEntity>{
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long identity;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=false, updatable=true)
 	@Min(1)
 	@Version
 	private int version;
 	
+	@XmlElement
 	@Column(nullable=false, insertable=true, updatable=false)
 	private long creationTimestamp;
 	
@@ -66,4 +68,10 @@ public class BaseEntity implements Comparable<BaseEntity>{
 	public long getCreationTimestamp() {
 		return creationTimestamp;
 	}
+
+	public void setVersion(int version) {
+		this.version = version;
+	}
+	
+	
 }
