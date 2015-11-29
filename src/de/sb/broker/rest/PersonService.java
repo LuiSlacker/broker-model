@@ -1,7 +1,5 @@
 package de.sb.broker.rest;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -12,15 +10,14 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Response.Status;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Bid;
@@ -85,7 +82,7 @@ public class PersonService {
 			person = new Person();
 		} else{
 			person = em.find(Person.class, template.getIdentity());
-			if (person == null) throw new ClientErrorException(NOT_FOUND);
+			if (person == null) throw new NotFoundException();
 		}
 		person.setAlias(template.getAlias());
 		person.setGroup(template.getGroup());
@@ -114,9 +111,7 @@ public class PersonService {
 		final Person person = em.find(Person.class, identity);
 		if (person != null){
 			return person;
-		} else{
-			throw new ClientErrorException(Status.NOT_FOUND);
-		}
+		} else throw new NotFoundException();
 	}
 	
 	@GET
@@ -129,7 +124,7 @@ public class PersonService {
 		
 		final Person person = em.find(Person.class, identity);
 		if (person == null) {
-			throw new ClientErrorException(NOT_FOUND);
+			throw new NotFoundException();
 		}
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
 		allAuctions.addAll(person.getAuctions());
@@ -151,6 +146,6 @@ public class PersonService {
 		final Person person = em.find(Person.class, identity);
 		if (person != null) {
 			return person.getBids();
-		} else throw new ClientErrorException(NOT_FOUND);
+		} else throw new NotFoundException();
 	}
 }

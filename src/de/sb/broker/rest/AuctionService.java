@@ -1,19 +1,17 @@
 package de.sb.broker.rest;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -68,16 +66,15 @@ public class AuctionService {
 		query.setParameter("descriptionFrag", descriptionFrag);
 		query.setParameter("likeExpression", "%" + descriptionFrag + "%");
 		
-		if (resultOffset != 0) query.setFirstResult(resultOffset);
-		if (resultLength != 0) query.setMaxResults(resultLength);
+		if (resultOffset > 0) query.setFirstResult(resultOffset);
+		if (resultLength > 0) query.setMaxResults(resultLength);
 		
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
 		Collection<Long> allAuctionIds = query.getResultList();
 		for (Long auctionId : allAuctionIds) {
-			try {
+			final Auction auction = em.find(Auction.class, auctionId);
+			if (auction != null) {
 				allAuctions.add(em.find(Auction.class, auctionId));
-			} catch (EntityNotFoundException e) {
-				throw new ClientErrorException(NOT_FOUND);
 			}
 		}
 		return allAuctions;
@@ -91,19 +88,16 @@ public class AuctionService {
 		final boolean persist = template.getIdentity() == 0;
 		final Auction auction;
 		if(persist){
-			Person person;
-			try {
-				person = em.find(Person.class, personId);
-			} catch (EntityNotFoundException e) {
-				throw new ClientErrorException(400);
+			final Person person = em.find(Person.class, personId);
+			if (person == null) {
+				throw new NotFoundException();
 			}
 			auction = new Auction(person);
 		} else{
-			try {
-				auction = em.find(Auction.class, template.getIdentity());
-			} catch (EntityNotFoundException e) {
-				throw new ClientErrorException(400);
-			}
+			auction = em.find(Auction.class, template.getIdentity());
+			if (auction == null) {
+				throw new NotFoundException();
+			} 
 			if (auction.isSealed()) {
 				throw new ClientErrorException(409);
 			}
@@ -125,10 +119,9 @@ public class AuctionService {
 	@Path("/{identity}")
 	@Produces({"application/xml", "application/json"})
 	public Auction getAuctionIdentity(@PathParam("identity") long identity) {
-		try {
-			return em.find(Auction.class, identity);
-		} catch (EntityNotFoundException e) {
-			throw new ClientErrorException(NOT_FOUND);
-		}
+		final Auction auction =  em.find(Auction.class, identity);
+		if (auction != null) {
+			return auction;
+		} else throw new NotFoundException();
 	}
 }
