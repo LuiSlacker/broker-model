@@ -41,7 +41,11 @@ public class PersonService {
 			@QueryParam("phone") String phone,
 			@QueryParam("street") String street,
 			@QueryParam("postcode") String postcode,
-			@QueryParam("city") String city) {
+			@QueryParam("city") String city,
+			@QueryParam("creationtimeLower") Long creationtimeLower,
+			@QueryParam("creationtimeUpper") Long creationtimeUpper,
+			@QueryParam("closuretimeLower") Long closuretimeLower,
+			@QueryParam("closuretimeUpper") Long closuretimeUpper) {
 		
 		TypedQuery<Long> query = em.createQuery("select p.identity from Person as p WHERE"
 				+ "(:alias is null or p.alias = :alias) and"
@@ -51,8 +55,11 @@ public class PersonService {
 				+ "(:phone is null or p.contact.phone = :phone) and"
 				+ "(:street is null or p.address.street = :street) and"
 				+ "(:postcode is null or p.address.postcode = :postcode) and"
-				+ "(:city is null or p.address.city = :city)", Long.class); //creationTimestamp
-		query.setParameter("alias", alias);
+				+ "(:city is null or p.address.city = :city) +"
+				+ "(:creationtimeLower is null or a.creationTimestamp >= :creationtimeLower) and"
+				+ "(:creationtimeUpper is null or a.creationTimestamp <= :creationtimeUpper) and"
+				+ "(:closuretimeLower is null or a.closureTimestamp <= :closuretimeLower) and"
+				+ "(:closuretimeUpper is null or a.closureTimestamp <= :closuretimeUpper)", Long.class);		query.setParameter("alias", alias);
 		query.setParameter("firstName", firstName);
 		query.setParameter("familyName", familyName);
 		query.setParameter("email", email);
@@ -60,6 +67,10 @@ public class PersonService {
 		query.setParameter("street", street);
 		query.setParameter("postcode", postcode);
 		query.setParameter("city", city);
+		query.setParameter("creationtimeLower", creationtimeLower);
+		query.setParameter("creationtimeUpper", creationtimeUpper);
+		query.setParameter("closuretimeLower", closuretimeLower);
+		query.setParameter("closuretimeUpper", closuretimeUpper);
 		
 		if (resultOffset > 0) query.setFirstResult(resultOffset);
 		if (resultLength > 0) query.setMaxResults(resultLength);
