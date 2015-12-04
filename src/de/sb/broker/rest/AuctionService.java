@@ -107,7 +107,7 @@ public class AuctionService {
 		auction.setClosureTimestamp(template.getClosureTimestamp());
 		auction.setAskingPrice(template.getAskingPrice());
 		auction.setUnitCount(template.getUnitCount());
-		//TODO  set version
+		auction.setVersion(template.getVersion());
 		em.getTransaction().begin();
 		if (persist) em.persist(auction);
 		em.getTransaction().commit();
