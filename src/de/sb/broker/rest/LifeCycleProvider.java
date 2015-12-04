@@ -6,13 +6,16 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.WebApplicationException;
@@ -57,7 +60,7 @@ public class LifeCycleProvider implements ContainerRequestFilter, ContainerRespo
 	static private volatile EntityManagerFactory BROKER_FACTORY;
 	static private final ThreadLocal<EntityManager> BROKER_THREAD_LOCAL = new ThreadLocal<>();
 	static private final Object MONITOR = new Object();
-	static private final String PERSON_BY_ALIAS = "select p from Person as p where p.alias = :alias";
+	static private final String PERSON_BY_ALIAS = "select p.identity from Person as p where p.alias = :alias";
 
 
 	/**
@@ -118,13 +121,25 @@ public class LifeCycleProvider implements ContainerRequestFilter, ContainerRespo
 		final String password = credentials.get("password");
 		if (!"basic".equals(mode) | username == null | password == null) throw new NotAuthorizedException("Basic");
 
-		// TODO: Replace with implementation of JPA authentication by calculating the password hash from the given
-		// password, creating a query using the constant below, and returning the person if it matches the password hash.
-		// If there is none, or if it fails the password hash check, then throw NotAuthorizedException("Basic"). Note
-		// that this exception type is a specialized Subclass of ClientErrorException that is capable of storing a
-		// challenge, in this case for Basic Authorization.
-		// existiert user mit passwort? sha256 berechnen und vergleichen
-		throw new AssertionError(PERSON_BY_ALIAS);
+		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
+		TypedQuery<Long> query= brokerManager.createQuery(PERSON_BY_ALIAS, Long.class);
+		query.setParameter("alias", username);
+		Long personId;
+		try {
+			personId = query.getSingleResult();
+		} catch (NoResultException e) {
+			throw new NotAuthorizedException("Basic");
+		}
+		Person person = brokerManager.find(Person.class, personId);
+		if (person == null) {
+			throw new NotAuthorizedException("Basic");
+		} 
+		
+		if(Arrays.equals(person.getPasswordHash(),Person.passwordHash(password))){
+			return person;
+		} else {
+			throw new NotAuthorizedException("Basic");
+		}
 	}
 
 
