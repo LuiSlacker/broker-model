@@ -173,7 +173,7 @@ public class AuctionService {
 	
 	@POST
 	@Path("/{identity}/bid")
-	@Produces({"application/xml", "application/json"})
+	@Consumes({"application/xml", "application/json"})
 	public void CreateUpdateOrDeleteBid(
 			@PathParam("identity") long identity,
 			@HeaderParam("Authorization") final String authentication,

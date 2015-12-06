@@ -198,7 +198,18 @@ public class PersonService {
 		final Person requester = LifeCycleProvider.authenticate(authentication);
 		final Person person = brokerManager.find(Person.class, identity);
 		if (person == null) throw new NotFoundException();
-		if (!requester.equals(person)) throw new ForbiddenException();
-		return person.getBids().toArray(new Bid[0]);
+		
+		Collection<Bid> bids = new TreeSet<Bid>(Comparator.comparing(Bid::getPrice));
+		
+		if (requester.equals(person)) {
+			bids.addAll(person.getBids());
+		} else{
+			for (Bid bid : person.getBids()) {
+				if (bid.getAuction().isClosed()){
+					bids.add(bid);
+				}
+			}
+		}
+		return bids.toArray(new Bid[0]);
 	}
 }
