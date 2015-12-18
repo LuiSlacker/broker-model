@@ -60,7 +60,7 @@ public class AuctionService {
 				+ "(:priceUpper is null or a.askingPrice <= :priceUpper) and"
 				+ "(:creationtimeLower is null or a.creationTimestamp >= :creationtimeLower) and"
 				+ "(:creationtimeUpper is null or a.creationTimestamp <= :creationtimeUpper) and"
-				+ "(:closuretimeLower is null or a.closureTimestamp <= :closuretimeLower) and"
+				+ "(:closuretimeLower is null or a.closureTimestamp >= :closuretimeLower) and"
 				+ "(:closuretimeUpper is null or a.closureTimestamp <= :closuretimeUpper) and"
 				+ "(:descriptionFrag is null or a.description like :likeExpression)", Long.class);
 		query.setParameter("title", title);
@@ -103,16 +103,18 @@ public class AuctionService {
 		final boolean persist = template.getIdentity() == 0;
 		final Auction auction;
 		if(persist){
-			final Person person = brokerManager.find(Person.class, personId);
-			if (person == null) {
-				throw new NotFoundException();
-			}
-			auction = new Auction(person);
-		} else if (requester.getIdentity() == template.getSellerReference()){
+//			final Person person = brokerManager.find(Person.class, requester.getIdentity());
+//			if (person == null) {
+//				throw new NotFoundException();
+//			}
+			auction = new Auction(requester);
+		} else {
 			auction = brokerManager.find(Auction.class, template.getIdentity());
 			if (auction == null) throw new NotFoundException();
+			if (requester.getIdentity() != auction.getSellerReference()) throw new ForbiddenException();
 			if (auction.isSealed()) throw new ForbiddenException();
-		} else throw new ForbiddenException();
+		}
+		//else throw new ForbiddenException();
 		
 		auction.setTitle(template.getTitle());
 		auction.setDescription(template.getDescription());

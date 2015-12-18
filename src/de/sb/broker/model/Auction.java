@@ -51,7 +51,7 @@ public class Auction extends BaseEntity{
 	@NotNull
 	private String description;
 	
-	@ManyToOne(optional=false)
+	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name="sellerReference", nullable=false, insertable=true, updatable=false)
 	private Person seller;
 	

@@ -164,7 +164,7 @@ public class PersonService {
 	@GET
 	@Path("/{identity}/auctions")
 	@Produces({"application/xml", "application/json"})
-	public Auction[] getAuction(
+	public Auction[] getAuctions(
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength,
