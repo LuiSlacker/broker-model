@@ -94,7 +94,6 @@ public class AuctionService {
 	@PUT
 	@Consumes({"application/xml", "application/json"})
 	public Long createOrUpdateAuctions(
-			@QueryParam("personId") int personId,
 			Auction template,
 			@HeaderParam("Authorization") final String authentication) {
 		
@@ -103,10 +102,6 @@ public class AuctionService {
 		final boolean persist = template.getIdentity() == 0;
 		final Auction auction;
 		if(persist){
-//			final Person person = brokerManager.find(Person.class, requester.getIdentity());
-//			if (person == null) {
-//				throw new NotFoundException();
-//			}
 			auction = new Auction(requester);
 		} else {
 			auction = brokerManager.find(Auction.class, template.getIdentity());
@@ -114,7 +109,6 @@ public class AuctionService {
 			if (requester.getIdentity() != auction.getSellerReference()) throw new ForbiddenException();
 			if (auction.isSealed()) throw new ForbiddenException();
 		}
-		//else throw new ForbiddenException();
 		
 		auction.setTitle(template.getTitle());
 		auction.setDescription(template.getDescription());
