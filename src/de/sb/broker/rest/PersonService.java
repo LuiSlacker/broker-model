@@ -182,7 +182,6 @@ public class PersonService {
 			allAuctions.add(bid.getAuction());
 		}
 		return allAuctions.toArray(new Auction[0]);
-		
 	}
 	
 	@GET

@@ -146,9 +146,8 @@ public class AuctionService {
 		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
 		LifeCycleProvider.authenticate(authentication);
 		final Auction auction =  brokerManager.find(Auction.class, identity);
-		if (auction != null) {
-			return auction;
-		} else throw new NotFoundException();
+		if (auction == null) throw new NotFoundException(); 
+		return auction; 
 	}
 	
 	@GET
@@ -201,9 +200,7 @@ public class AuctionService {
 
 		try {
 			if (persist) brokerManager.persist(bid);	
-			else {
-				brokerManager.flush();
-			}
+			else brokerManager.flush();
 		} catch (ConstraintViolationException e) {
 			throw new ClientErrorException(BAD_REQUEST);
 		}
