@@ -3,6 +3,7 @@ package de.sb.broker.rest;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -25,6 +26,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.Response;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Bid;
@@ -36,7 +39,7 @@ public class AuctionService {
 	@GET
 	@Produces({"application/xml", "application/json"})
 	@Auction.XmlSellerAsEntityFilter
-	public Collection<Auction> getAuctions(
+	public Response getAuctions(
 			@HeaderParam("Authorization") final String authentication,
 			@QueryParam("title") String title,
 			@QueryParam("UCLower") Long UCLower,
@@ -49,7 +52,8 @@ public class AuctionService {
 			@QueryParam("creationtimeUpper") Long creationtimeUpper,
 			@QueryParam("closuretimeLower") Long closuretimeLower,
 			@QueryParam("closuretimeUpper") Long closuretimeUpper,
-			@QueryParam("descriptionFrag") String descriptionFrag) {
+			@QueryParam("descriptionFrag") String descriptionFrag,
+			@QueryParam("closed") Boolean closed) {
 		
 		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
 		LifeCycleProvider.authenticate(authentication);
@@ -81,15 +85,36 @@ public class AuctionService {
 		
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
 		Collection<Long> allAuctionIds = query.getResultList();
-		for (Long auctionId : allAuctionIds) {
-			final Auction auction = brokerManager.find(Auction.class, auctionId);
-			if (auction != null) {
-				allAuctions.add(auction);
-			} else {
-				throw new NotFoundException();
+		
+		Auction auction;
+		GenericEntity<?> wrapper = new GenericEntity<Collection<Auction>>(allAuctions) {};
+		Annotation[] filterAnnotations = new Annotation[] {};
+		if (closed != null){
+			for (Long auctionId : allAuctionIds) {
+				auction = brokerManager.find(Auction.class, auctionId);
+				if (auction != null) {
+					if (auction.isClosed() == closed) {
+						allAuctions.add(auction);
+					}
+					if (closed){
+						filterAnnotations = new Annotation[] { new Auction.XmlBidsAsEntityFilter.Literal(), new Bid.XmlAuctionAsReferenceFilter.Literal()};
+					}
+				} else {
+					throw new NotFoundException();
+				}
+			}
+		} else{
+			for (Long auctionId : allAuctionIds) {
+				auction = brokerManager.find(Auction.class, auctionId);
+				if (auction != null ) {
+					allAuctions.add(auction);
+				} else {
+					throw new NotFoundException();
+				}
 			}
 		}
-		return allAuctions;
+
+		return Response.ok().entity(wrapper, filterAnnotations).build();
 	}
 	
 	@PUT

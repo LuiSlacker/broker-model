@@ -4,6 +4,7 @@ import static de.sb.broker.model.Person.Group.ADMIN;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CONFLICT;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -25,6 +26,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.Response;
 
 import de.sb.broker.model.Auction;
 import de.sb.broker.model.Bid;
@@ -164,10 +167,11 @@ public class PersonService {
 	@GET
 	@Path("/{identity}/auctions")
 	@Produces({"application/xml", "application/json"})
-	public Auction[] getAuctions(
+	public Response getAuctions(
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength,
+			@QueryParam("closed") Boolean closed,
 			@HeaderParam("Authorization") final String authentication) {
 		
 		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
@@ -177,11 +181,29 @@ public class PersonService {
 			throw new NotFoundException();
 		}
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
-		allAuctions.addAll(person.getAuctions());
-		for (Bid bid : person.getBids()) {
-			allAuctions.add(bid.getAuction());
+		GenericEntity<?> wrapper = new GenericEntity<Collection<Auction>>(allAuctions) {};
+		Annotation[] filterAnnotations = new Annotation[] {};
+		if (closed != null){
+			for(Auction auction : person.getAuctions()){
+				if(auction.isClosed() == closed){
+					allAuctions.add(auction);
+				}
+			}
+			for (Bid bid : person.getBids()) {
+				if (bid.getAuction().isClosed() == closed){
+					allAuctions.add(bid.getAuction());
+				}
+			}
+			if(closed){
+				filterAnnotations = new Annotation[] { new Auction.XmlSellerAsReferenceFilter.Literal(), new Auction.XmlBidsAsEntityFilter.Literal(), new Bid.XmlBidderAsEntityFilter.Literal(),new Bid.XmlAuctionAsReferenceFilter.Literal()};
+			}
+		} else{
+			allAuctions.addAll(person.getAuctions());
+			for (Bid bid : person.getBids()) {
+				allAuctions.add(bid.getAuction());
+			}
 		}
-		return allAuctions.toArray(new Auction[0]);
+		return Response.ok().entity(wrapper, filterAnnotations).build();
 		
 	}
 	
