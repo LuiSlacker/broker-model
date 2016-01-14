@@ -20,6 +20,8 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.eclipse.persistence.annotations.CacheIndex;
+
 @XmlRootElement(name = "person")
 @Table(name="Person", schema="broker")
 @Entity
@@ -31,6 +33,7 @@ public class Person extends BaseEntity{
 	@Column(nullable=false, insertable=true, updatable=true, unique=true)
 	@Size(min=1,max=16)
 	@NotNull
+	@CacheIndex(updateable=true) //für secondlevel cache
 	private String alias;
 	
 	@Column(nullable=false, insertable=true, updatable=true)

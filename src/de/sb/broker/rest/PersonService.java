@@ -204,7 +204,6 @@ public class PersonService {
 			}
 		}
 		return Response.ok().entity(wrapper, filterAnnotations).build();
-		
 	}
 	
 	@GET
