@@ -35,6 +35,7 @@ public class AuctionService {
 
 	@GET
 	@Produces({"application/xml", "application/json"})
+	@Auction.XmlSellerAsEntityFilter
 	public Collection<Auction> getAuctions(
 			@HeaderParam("Authorization") final String authentication,
 			@QueryParam("title") String title,
@@ -103,10 +104,6 @@ public class AuctionService {
 		final boolean persist = template.getIdentity() == 0;
 		final Auction auction;
 		if(persist){
-//			final Person person = brokerManager.find(Person.class, requester.getIdentity());
-//			if (person == null) {
-//				throw new NotFoundException();
-//			}
 			auction = new Auction(requester);
 		} else {
 			auction = brokerManager.find(Auction.class, template.getIdentity());
@@ -114,7 +111,6 @@ public class AuctionService {
 			if (requester.getIdentity() != auction.getSellerReference()) throw new ForbiddenException();
 			if (auction.isSealed()) throw new ForbiddenException();
 		}
-		//else throw new ForbiddenException();
 		
 		auction.setTitle(template.getTitle());
 		auction.setDescription(template.getDescription());
@@ -145,6 +141,7 @@ public class AuctionService {
 	@GET
 	@Path("/{identity}")
 	@Produces({"application/xml", "application/json"})
+	@Auction.XmlSellerAsReferenceFilter
 	public Auction getAuctionIdentity(
 			@PathParam("identity") long identity,
 			@HeaderParam("Authorization") final String authentication) {
@@ -160,6 +157,8 @@ public class AuctionService {
 	@GET
 	@Path("/{identity}/bid")
 	@Produces({"application/xml", "application/json"})
+	@Bid.XmlBidderAsReferenceFilter
+	@Bid.XmlAuctionAsReferenceFilter
 	public Bid getBidForAuction(
 			@PathParam("identity") long identity,
 			@HeaderParam("Authorization") final String authentication) {

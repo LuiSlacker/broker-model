@@ -188,6 +188,8 @@ public class PersonService {
 	@GET
 	@Path("/{identity}/bids")
 	@Produces({"application/xml", "application/json"})
+	@Bid.XmlBidderAsReferenceFilter
+	@Bid.XmlAuctionAsReferenceFilter
 	public Bid[] getBids(
 		@HeaderParam("Authorization") final String authentication,
 		@PathParam("identity") long identity,
