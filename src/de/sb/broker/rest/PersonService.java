@@ -7,6 +7,7 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import javax.persistence.EntityManager;
@@ -171,11 +172,12 @@ public class PersonService {
 			@PathParam("identity") long identity,
 			@QueryParam("ResultOffset") int ResultOffset,
 			@QueryParam("ResultLength") int ResultLength,
+			@QueryParam("seller") Boolean seller,
 			@QueryParam("closed") Boolean closed,
 			@HeaderParam("Authorization") final String authentication) {
 		
 		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
-		LifeCycleProvider.authenticate(authentication);
+		final Person requester = LifeCycleProvider.authenticate(authentication);
 		final Person person = brokerManager.find(Person.class, identity);
 		if (person == null) {
 			throw new NotFoundException();
@@ -183,6 +185,7 @@ public class PersonService {
 		Collection<Auction> allAuctions = new TreeSet<Auction>(Comparator.comparing(Auction::getTitle));
 		GenericEntity<?> wrapper = new GenericEntity<Collection<Auction>>(allAuctions) {};
 		Annotation[] filterAnnotations = new Annotation[] {};
+		
 		if (closed != null){
 			for(Auction auction : person.getAuctions()){
 				if(auction.isClosed() == closed){
@@ -201,6 +204,29 @@ public class PersonService {
 			allAuctions.addAll(person.getAuctions());
 			for (Bid bid : person.getBids()) {
 				allAuctions.add(bid.getAuction());
+			}
+		}
+		if(seller != null){
+			if(seller){
+				for (Iterator<Auction> auctionIterator = allAuctions.iterator(); auctionIterator.hasNext(); ){
+					final Auction auction = auctionIterator.next();
+					if(auction.getSellerReference() != requester.getIdentity()){
+						auctionIterator.remove();
+					}
+				}
+			}
+			else{
+				for (Iterator<Auction> auctionIterator = allAuctions.iterator(); auctionIterator.hasNext(); ){
+					final Auction auction = auctionIterator.next();
+					if (auction.getSellerReference() == requester.getIdentity()){
+						auctionIterator.remove();
+					}
+				}
+				if(closed){
+					filterAnnotations = new Annotation[] { new Auction.XmlSellerAsEntityFilter.Literal(), new Auction.XmlBidsAsEntityFilter.Literal(), new Bid.XmlBidderAsEntityFilter.Literal(),new Bid.XmlAuctionAsReferenceFilter.Literal()};
+				} else {
+					filterAnnotations = new Annotation[] {new Auction.XmlSellerAsEntityFilter.Literal()};
+				}
 			}
 		}
 		return Response.ok().entity(wrapper, filterAnnotations).build();
