@@ -177,7 +177,7 @@ public class PersonService {
 			@HeaderParam("Authorization") final String authentication) {
 		
 		final EntityManager brokerManager = LifeCycleProvider.brokerManager();
-		final Person requester = LifeCycleProvider.authenticate(authentication);
+		LifeCycleProvider.authenticate(authentication);
 		final Person person = brokerManager.find(Person.class, identity);
 		if (person == null) {
 			throw new NotFoundException();
@@ -210,7 +210,7 @@ public class PersonService {
 			if(seller){
 				for (Iterator<Auction> auctionIterator = allAuctions.iterator(); auctionIterator.hasNext(); ){
 					final Auction auction = auctionIterator.next();
-					if(auction.getSellerReference() != requester.getIdentity()){
+					if(auction.getSellerReference() != identity){
 						auctionIterator.remove();
 					}
 				}
@@ -218,12 +218,12 @@ public class PersonService {
 			else{
 				for (Iterator<Auction> auctionIterator = allAuctions.iterator(); auctionIterator.hasNext(); ){
 					final Auction auction = auctionIterator.next();
-					if (auction.getSellerReference() == requester.getIdentity()){
+					if (auction.getSellerReference() == identity){
 						auctionIterator.remove();
 					}
 				}
 				if(closed){
-					filterAnnotations = new Annotation[] { new Auction.XmlSellerAsEntityFilter.Literal(), new Auction.XmlBidsAsEntityFilter.Literal(), new Bid.XmlBidderAsEntityFilter.Literal(),new Bid.XmlAuctionAsReferenceFilter.Literal()};
+					filterAnnotations = new Annotation[] {new Bid.XmlBidderAsEntityFilter.Literal(), new Auction.XmlBidsAsEntityFilter.Literal(), new Bid.XmlAuctionAsReferenceFilter.Literal(),  new Auction.XmlSellerAsEntityFilter.Literal()};
 				} else {
 					filterAnnotations = new Annotation[] {new Auction.XmlSellerAsEntityFilter.Literal()};
 				}
